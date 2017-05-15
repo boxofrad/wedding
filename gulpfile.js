@@ -21,17 +21,17 @@ gulp.task('default', () => {
       .pipe(sassFilter.restore)
 
       // replace image references with fingerprinted file names
-      .pipe(revReplace())
+      .pipe(revReplace({ prefix: '/static/' }))
 
       // fingerprint the CSS file now that the image references have been rewritten
       .pipe(cssFilter)
       .pipe(rev())
       .pipe(cssFilter.restore)
-      .pipe(gulp.dest('./public'))
+      .pipe(gulp.dest('./static'))
 
       // save out a manifest
       .pipe(rev.manifest())
-      .pipe(gulp.dest('./public'));
+      .pipe(gulp.dest('./static'));
 });
 
 gulp.task('watch', () => {
