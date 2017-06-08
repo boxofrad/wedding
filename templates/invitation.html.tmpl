@@ -1,0 +1,38 @@
+{{define "content"}}
+  <h1>{{.Addressees}}</h1>
+
+  <form action="/rsvp/{{.Id}}" method="POST">
+    <!-- TODO: Single Guest -->
+
+    {{range .Guests}}
+      <div class="js-guest" data-guest-id="{{ .Id }}">
+        {{.FirstName}}
+
+        {{if eq .PartOfDay "Service"}}
+          <!-- TODO -->
+          <input type="radio" value="Service Only"> Will be attending<br>
+          <input type="radio" value="Not Attending"> Will not be attending
+        {{else}}
+          <input type="checkbox" name="guest[{{.Id}}][attending_service]" value="1" {{if .AttendingService}}checked{{end}}> Service<br>
+          {{if eq .PartOfDay "Service & Reception"}}
+            <input type="checkbox" class="js-reception-toggle" name="guest[{{.Id}}][attending_reception]" value="1" {{if .AttendingReception}}checked{{end}}> Reception<br>
+          {{end }}
+          <input type="checkbox" name="guest[{{.Id}}][attending_evening]" value="1" {{if .AttendingEvening}}checked{{end}}> Evening
+        {{end}}
+
+        {{if eq .PartOfDay "Service & Reception"}}
+          <div class="js-meal-options {{if not .AttendingReception}}hidden{{end}}">
+            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Meat" {{if eq .MealType "Meat"}}checked{{end}}>Meat<br>
+            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Vegetarian" {{if eq .MealType "Vegetarian"}}checked{{end}}>Vegetarian<br>
+            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Vegan" {{if eq .MealType "Vegan"}}checked{{end}}>Vegan<br>
+            <textarea name="guest[{{.Id}}][additional_dietary_requirements]">{{.AdditionalDietaryRequirements}}</textarea>
+          </div>
+        {{end}}
+      </div>
+    {{end}}
+
+    <input type="submit" value="Submit" />
+  </form>
+
+  <script src="{{asset_path "rsvp.js"}}"></script>
+{{end}}

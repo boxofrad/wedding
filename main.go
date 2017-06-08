@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,7 +20,10 @@ var (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", serveRoot)
+	r.HandleFunc("/", serveTemplate("index"))
+	r.HandleFunc("/rsvp", serveRSVP).Methods("GET")
+	r.HandleFunc("/rsvp/{id}", serveRSVPResponse).Methods("POST")
+	r.HandleFunc("/rsvp/{id}/success", serveTemplate("rsvp_success")).Methods("GET")
 
 	// TODO: Cache assets
 	r.PathPrefix(staticPath).
@@ -28,7 +32,57 @@ func main() {
 	log.Fatal(http.ListenAndServe(listen, r))
 }
 
-func serveRoot(w http.ResponseWriter, _ *http.Request) {
+// TODO: Handle the error
+func serveRSVP(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+
+	if code == "" {
+		renderTemplate(w, "rsvp", nil)
+		return
+	}
+
+	invitation, err := invitationWithCode(code)
+	if err != nil {
+		handleErr(w, err)
+		return
+	}
+
+	renderTemplate(w, "invitation", invitation)
+}
+
+func serveRSVPResponse(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+
+	i, err := invitationWithId(id)
+	if err != nil {
+		handleErr(w, err)
+		return
+	}
+
+	for _, guestId := range i.GuestIds {
+		formVal := func(k string) string {
+			return r.FormValue(fmt.Sprintf("guest[%s][%s]", guestId, k))
+		}
+
+		err = updateGuest(guestId, UpdateGuestFields{
+			RSVPReceived:                  true,
+			AttendingService:              formVal("attending_service") == "1",
+			AttendingReception:            formVal("attending_reception") == "1",
+			AttendingEvening:              formVal("attending_evening") == "1",
+			MealType:                      formVal("meal_type"),
+			AdditionalDietaryRequirements: formVal("additional_dietary_requirements"),
+		})
+
+		if err != nil {
+			handleErr(w, err)
+			return
+		}
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/rsvp/%s/success", id), http.StatusFound)
+}
+
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	assetFn, err := assetPathHelper()
 	if err != nil {
 		handleErr(w, err)
@@ -37,17 +91,23 @@ func serveRoot(w http.ResponseWriter, _ *http.Request) {
 
 	tmpl, err := template.New("").
 		Funcs(map[string]interface{}{"asset_path": assetFn}).
-		ParseFiles("templates/index.html.tmpl")
+		ParseFiles("templates/"+name+".html.tmpl", "templates/layout.html.tmpl")
 	if err != nil {
 		handleErr(w, err)
 		return
 	}
 
-	if err = tmpl.ExecuteTemplate(w, "index.html.tmpl", struct{}{}); err != nil {
+	if err = tmpl.ExecuteTemplate(w, "base", data); err != nil {
 		handleErr(w, err)
 	}
 }
 
+func serveTemplate(name string) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		renderTemplate(w, name, nil)
+	}
+}
+
 func handleErr(w http.ResponseWriter, err error) {
-	// TODO: Do something with the error
+	fmt.Fprintf(w, "ERROR: %s", err)
 }
