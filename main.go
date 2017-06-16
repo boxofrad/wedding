@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	staticPath = "/static"
+	staticPath  = "/static"
+	giftListURL = "https://booking.kuoni.co.uk/ob/X1ROOT?TRNTPD=GF04&TRNNRD=1&GFTGID=34182"
 )
 
 var (
@@ -24,22 +25,13 @@ func main() {
 	r.HandleFunc("/rsvp", serveRSVP).Methods("GET")
 	r.HandleFunc("/rsvp/{id}", serveRSVPResponse).Methods("POST")
 	r.HandleFunc("/rsvp/{id}/success", serveTemplate("rsvp_success")).Methods("GET")
-	r.HandleFunc("/gifts", serveGifts).Methods("GET")
+	r.Handle("/gifts", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
 
 	// TODO: Cache assets
 	r.PathPrefix(staticPath).
 		Handler(http.StripPrefix(staticPath, http.FileServer(http.Dir("./static"))))
 
 	log.Fatal(http.ListenAndServe(listen, r))
-}
-
-func serveGifts(w http.ResponseWriter, r *http.Request) {
-	sessionId, err := getGiftListSessionId()
-	if err != nil {
-		handleErr(w, err)
-		return
-	}
-	renderTemplate(w, "gifts", struct{ SessionID string }{sessionId})
 }
 
 // TODO: Handle the error
