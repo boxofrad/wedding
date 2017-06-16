@@ -1,0 +1,11 @@
+{{define "content"}}
+  <h1>Gift List</h1>
+  <form action="https://booking.kuoni.co.uk/ob/X1ROOT" method="POST" id="form" style="visibility: hidden;">
+    <input type="hidden" name="TRNTPD" value="GF04" />
+    <input type="hidden" name="SSNIDD" value="{{.SessionID}}" />
+    <input type="hidden" name="TRNNRD" value="1" />
+    <input type="hidden" name="GFTGID" value="34182" />
+    <input type="submit" value="Submit" />
+  </form>
+  <script>document.getElementById('form').submit();</script>
+{{end}}
