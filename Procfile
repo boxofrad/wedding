@@ -1,1 +1,1 @@
-web: wedding
+web: wedding server

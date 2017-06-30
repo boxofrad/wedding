@@ -206,3 +206,71 @@ func updateGuest(id string, fields UpdateGuestParams) error {
 	}
 	return nil
 }
+
+func getInvitationsWithoutCodes() ([]string, error) {
+	q := make(url.Values)
+	q.Add("filterByFormula", `{Code} = ""`)
+
+	req, err := http.NewRequest("GET", airtableBaseUrl+"Invitations?"+q.Encode(), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
+	}
+
+	response := struct {
+		Records []struct {
+			Id string `json:"id"`
+		} `json:"records"`
+	}{}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, len(response.Records))
+	for i, record := range response.Records {
+		ids[i] = record.Id
+	}
+	return ids, nil
+}
+
+func updateInvitationCode(id, code string) error {
+	body := struct {
+		Fields struct {
+			Code string `json:"Code"`
+		} `json:"fields"`
+	}{}
+	body.Fields.Code = code
+
+	b := new(bytes.Buffer)
+	if err := json.NewEncoder(b).Encode(body); err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("PATCH", airtableBaseUrl+"Invitations/"+id, b)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
+	}
+	return nil
+}
