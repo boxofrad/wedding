@@ -10,6 +10,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TODO: Better name for this
+type errorMessage struct {
+	ErrorMessage string
+}
+
 const (
 	staticPath  = "/static"
 	giftListURL = "https://booking.kuoni.co.uk/ob/X1ROOT?TRNTPD=GF04&TRNNRD=1&GFTGID=34182"
@@ -22,9 +27,11 @@ var (
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", serveTemplate("index"))
-	r.HandleFunc("/rsvp", serveRSVP).Methods("GET")
-	r.HandleFunc("/rsvp/{id}", serveRSVPResponse).Methods("POST")
-	r.HandleFunc("/rsvp/{id}/success", serveTemplate("rsvp_success")).Methods("GET")
+	r.HandleFunc("/rsvp", serveTemplate("rsvp_form")).Methods("GET")
+	r.HandleFunc("/rsvp", serveRSVP).Methods("POST")
+	r.HandleFunc("/invitation/{id}", serveInvitationForm).Methods("GET")
+	r.HandleFunc("/invitation/{id}", serveInvitation).Methods("POST")
+	r.HandleFunc("/invitation/{id}/success", serveTemplate("rsvp_success")).Methods("GET")
 	r.Handle("/gifts", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
 
 	// TODO: Cache assets
@@ -34,54 +41,72 @@ func main() {
 	log.Fatal(http.ListenAndServe(listen, r))
 }
 
-// TODO: Handle the error
 func serveRSVP(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
+	code := r.FormValue("code")
 
 	if code == "" {
-		renderTemplate(w, "rsvp", nil)
+		renderTemplate(w, "rsvp_form", errorMessage{"Please enter the code written on your RSVP card."})
 		return
 	}
 
-	invitation, err := invitationWithCode(code)
+	id, err := getInvitationId(code)
+	if err == ErrNotFound {
+		renderTemplate(w, "rsvp_form", errorMessage{"Uh-oh, we don't recognise that code. Please make sure you typed it correctly."})
+		return
+	}
 	if err != nil {
 		handleErr(w, err)
 		return
 	}
 
-	renderTemplate(w, "invitation", invitation)
+	http.Redirect(w, r, "/invitation/"+id, http.StatusFound)
 }
 
-func serveRSVPResponse(w http.ResponseWriter, r *http.Request) {
+func serveInvitationForm(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	i, err := invitationWithId(id)
+	invitation, err := getInvitation(id)
+	if err == ErrNotFound {
+		http.Redirect(w, r, "/rsvp", http.StatusFound)
+		return
+	}
 	if err != nil {
 		handleErr(w, err)
 		return
 	}
 
-	for _, guestId := range i.GuestIds {
-		formVal := func(k string) string {
-			return r.FormValue(fmt.Sprintf("guest[%s][%s]", guestId, k))
-		}
+	renderTemplate(w, "invitation", struct {
+		InvitationForm *InvitationForm
+		ErrorMessage   string
+	}{NewInvitationForm(invitation), ""})
+}
 
-		err = updateGuest(guestId, UpdateGuestFields{
-			RSVPReceived:                  true,
-			AttendingService:              formVal("attending_service") == "1",
-			AttendingReception:            formVal("attending_reception") == "1",
-			AttendingEvening:              formVal("attending_evening") == "1",
-			MealType:                      formVal("meal_type"),
-			AdditionalDietaryRequirements: formVal("additional_dietary_requirements"),
-		})
+func serveInvitation(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
 
-		if err != nil {
+	invitation, err := getInvitation(id)
+	if err != nil {
+		handleErr(w, err)
+		return
+	}
+
+	form := NewInvitationForm(invitation)
+	form.Parse(r)
+
+	if valid, errors := form.Validate(); !valid {
+		renderTemplate(w, "invitation", struct {
+			InvitationForm *InvitationForm
+			ErrorMessage   string
+		}{form, errors[0]})
+		return
+	}
+
+	for _, guestForm := range form.GuestForms {
+		if err := updateGuest(guestForm.Guest.Id, guestForm.UpdateParams()); err != nil {
 			handleErr(w, err)
 			return
 		}
 	}
-
-	http.Redirect(w, r, fmt.Sprintf("/rsvp/%s/success", id), http.StatusFound)
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {

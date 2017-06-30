@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,17 +16,22 @@ const (
 
 var (
 	airtableKey = os.Getenv("AIRTABLE_KEY")
+	httpClient  = http.DefaultClient
+
+	ErrNotFound = errors.New("airtable: not found")
 )
 
 type Guest struct {
 	Id                            string
 	FirstName                     string
 	PartOfDay                     string
+	RSVPReceived                  bool
 	AttendingService              bool
 	AttendingReception            bool
 	AttendingEvening              bool
 	MealType                      string
 	AdditionalDietaryRequirements string
+	BingoFact                     string
 }
 
 type Invitation struct {
@@ -35,114 +41,49 @@ type Invitation struct {
 	Guests     []*Guest
 }
 
-func invitationWithCode(code string) (*Invitation, error) {
+func getInvitationId(code string) (string, error) {
 	q := make(url.Values)
 	q.Add("filterByFormula", fmt.Sprintf(`{Code}="%s"`, code))
 
 	req, err := http.NewRequest("GET", airtableBaseUrl+"Invitations?"+q.Encode(), nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
+		return "", fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
 	}
 
 	response := struct {
 		Records []struct {
-			Id     string `json:"id"`
-			Fields struct {
-				Addressees string   `json:"addressees"`
-				Guests     []string `json:"guests"`
-			} `json:"fields"`
+			Id string `json:"id"`
 		} `json:"records"`
 	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if len(response.Records) == 0 {
-		return nil, fmt.Errorf(`airtable: no invitation found with code "%s"`, code)
+		return "", ErrNotFound
 	}
-
-	fields := response.Records[0].Fields
-	guests := make([]*Guest, len(fields.Guests))
-	for i, guestId := range fields.Guests {
-		guest, err := getGuest(guestId)
-		if err != nil {
-			return nil, err
-		}
-		guests[i] = guest
-	}
-
-	return &Invitation{
-		Id:         response.Records[0].Id,
-		Addressees: fields.Addressees,
-		GuestIds:   fields.Guests,
-		Guests:     guests,
-	}, nil
+	return response.Records[0].Id, nil
 }
 
-func getGuest(id string) (*Guest, error) {
-	req, err := http.NewRequest("GET", airtableBaseUrl+"Guests/"+id, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
-	}
-
-	response := struct {
-		Id     string `json:"id"`
-		Fields struct {
-			FirstName                     string `json:"First Name"`
-			PartOfDay                     string `json:"Part of Day"`
-			AttendingService              bool   `json:"Attending Service?"`
-			AttendingReception            bool   `json:"Attending Reception?"`
-			AttendingEvening              bool   `json:"Attending Evening?"`
-			MealType                      string `json:"Meal Type"`
-			AdditionalDietaryRequirements string `json:"Additional Dietary Requirements"`
-		} `json:"fields"`
-	}{}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &Guest{
-		Id:                            response.Id,
-		FirstName:                     response.Fields.FirstName,
-		PartOfDay:                     response.Fields.PartOfDay,
-		AttendingService:              response.Fields.AttendingService,
-		AttendingReception:            response.Fields.AttendingReception,
-		AttendingEvening:              response.Fields.AttendingEvening,
-		MealType:                      response.Fields.MealType,
-		AdditionalDietaryRequirements: response.Fields.AdditionalDietaryRequirements,
-	}, nil
-}
-
-func invitationWithId(id string) (*Invitation, error) {
+func getInvitation(id string) (*Invitation, error) {
 	req, err := http.NewRequest("GET", airtableBaseUrl+"Invitations/"+id, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -163,26 +104,86 @@ func invitationWithId(id string) (*Invitation, error) {
 		return nil, err
 	}
 
+	guests := make([]*Guest, len(response.Fields.Guests))
+	for i, guestId := range response.Fields.Guests {
+		guest, err := getGuest(guestId)
+		if err != nil {
+			return nil, err
+		}
+		guests[i] = guest
+	}
+
 	return &Invitation{
 		Id:         response.Id,
 		Addressees: response.Fields.Addressees,
 		GuestIds:   response.Fields.Guests,
+		Guests:     guests,
 	}, nil
 }
 
-type UpdateGuestFields struct {
+func getGuest(id string) (*Guest, error) {
+	req, err := http.NewRequest("GET", airtableBaseUrl+"Guests/"+id, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("airtable: unexpected response code %d", resp.StatusCode)
+	}
+
+	response := struct {
+		Id     string `json:"id"`
+		Fields struct {
+			FirstName                     string `json:"First Name"`
+			PartOfDay                     string `json:"Part of Day"`
+			RSVPReceived                  bool   `json:"RSVP Received?"`
+			AttendingService              bool   `json:"Attending Service?"`
+			AttendingReception            bool   `json:"Attending Reception?"`
+			AttendingEvening              bool   `json:"Attending Evening?"`
+			MealType                      string `json:"Meal Type"`
+			AdditionalDietaryRequirements string `json:"Additional Dietary Requirements"`
+			BingoFact                     string `json:"Bingo Fact"`
+		} `json:"fields"`
+	}{}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	return &Guest{
+		Id:                            response.Id,
+		FirstName:                     response.Fields.FirstName,
+		PartOfDay:                     response.Fields.PartOfDay,
+		RSVPReceived:                  response.Fields.RSVPReceived,
+		AttendingService:              response.Fields.AttendingService,
+		AttendingReception:            response.Fields.AttendingReception,
+		AttendingEvening:              response.Fields.AttendingEvening,
+		MealType:                      response.Fields.MealType,
+		AdditionalDietaryRequirements: response.Fields.AdditionalDietaryRequirements,
+		BingoFact:                     response.Fields.BingoFact,
+	}, nil
+}
+
+type UpdateGuestParams struct {
 	RSVPReceived                  bool   `json:"RSVP Received?"`
 	AttendingService              bool   `json:"Attending Service?"`
 	AttendingReception            bool   `json:"Attending Reception?"`
 	AttendingEvening              bool   `json:"Attending Evening?"`
-	MealType                      string `json:"Meal Type"`
+	MealType                      string `json:"Meal Type,omitempty"`
 	AdditionalDietaryRequirements string `json:"Additional Dietary Requirements"`
+	BingoFact                     string `json:"Bingo Fact"`
 }
 
-func updateGuest(id string, fields UpdateGuestFields) error {
+func updateGuest(id string, fields UpdateGuestParams) error {
 	b := new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(struct {
-		Fields UpdateGuestFields `json:"fields"`
+		Fields UpdateGuestParams `json:"fields"`
 	}{fields}); err != nil {
 		return err
 	}
@@ -194,7 +195,7 @@ func updateGuest(id string, fields UpdateGuestFields) error {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", airtableKey))
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return err
 	}

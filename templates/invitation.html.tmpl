@@ -1,38 +1,93 @@
 {{define "content"}}
-  <h1>{{.Addressees}}</h1>
+  {{with .InvitationForm}}
+    <div class="rsvp">
+      <h1 class="rsvp__title">RSVP</h1>
+      <h2 class="rsvp__subtitle">Daniel &amp; Claire's Wedding</h2>
+      <h3>{{.Invitation.Addressees}}</h3>
 
-  <form action="/rsvp/{{.Id}}" method="POST">
-    <!-- TODO: Single Guest -->
+      <form action="/invitation/{{.Invitation.Id}}" method="POST">
+        {{range .GuestForms}}
+          <div class="rsvp__guest js-guest">
+            <h4 class="rsvp__guest-name">{{.Guest.FirstName}}</h4>
 
-    {{range .Guests}}
-      <div class="js-guest" data-guest-id="{{ .Id }}">
-        {{.FirstName}}
+            <div class="rsvp__part-of-day">
+              <div class="rsvp__part-of-day-label">
+                Service<br>
+                <small>(1.15pm &mdash; 2.45pm)</small>
+              </div>
 
-        {{if eq .PartOfDay "Service"}}
-          <!-- TODO -->
-          <input type="radio" value="Service Only"> Will be attending<br>
-          <input type="radio" value="Not Attending"> Will not be attending
-        {{else}}
-          <input type="checkbox" name="guest[{{.Id}}][attending_service]" value="1" {{if .AttendingService}}checked{{end}}> Service<br>
-          {{if eq .PartOfDay "Service & Reception"}}
-            <input type="checkbox" class="js-reception-toggle" name="guest[{{.Id}}][attending_reception]" value="1" {{if .AttendingReception}}checked{{end}}> Reception<br>
-          {{end }}
-          <input type="checkbox" name="guest[{{.Id}}][attending_evening]" value="1" {{if .AttendingEvening}}checked{{end}}> Evening
-        {{end}}
+              <label class="rsvp__part-of-day-option">
+                <input type="radio" name="{{.FieldName "attending_service"}}" value="1" {{if .AttendingService}}checked{{end}}> Attending
+              </label>
 
-        {{if eq .PartOfDay "Service & Reception"}}
-          <div class="js-meal-options {{if not .AttendingReception}}hidden{{end}}">
-            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Meat" {{if eq .MealType "Meat"}}checked{{end}}>Meat<br>
-            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Vegetarian" {{if eq .MealType "Vegetarian"}}checked{{end}}>Vegetarian<br>
-            <input type="radio" name="guest[{{.Id}}][meal_type]" value="Vegan" {{if eq .MealType "Vegan"}}checked{{end}}>Vegan<br>
-            <textarea name="guest[{{.Id}}][additional_dietary_requirements]">{{.AdditionalDietaryRequirements}}</textarea>
+              <label class="rsvp__part-of-day-option">
+                <input type="radio" name="{{.FieldName "attending_service"}}" value="0" {{if .NotAttendingEvening}}checked{{end}}> Not attending
+              </label>
+            </div>
+
+            {{if eq .Guest.PartOfDay "Service & Reception"}}
+              <div class="rsvp__part-of-day">
+                <div class="rsvp__part-of-day-label">
+                  Reception<br>
+                  <small>(3.15pm &mdash; 8pm)</small>
+                </div>
+
+                <label class="rsvp__part-of-day-option">
+                  <input type="radio" class="js-reception-toggle" name="{{.FieldName "attending_reception"}}" value="1" {{if .AttendingReception}}checked{{end}}> Attending
+                </label>
+
+                <label class="rsvp__part-of-day-option">
+                  <input type="radio" class="js-reception-toggle" name="{{.FieldName "attending_reception"}}" value="0" {{if .NotAttendingReception}}checked{{end}}> Not attending
+                </label>
+              </div>
+
+              <div class="rsvp__reception-fields js-reception-fields {{if not .AttendingReception}}hidden{{end}}">
+                <label class="rsvp__section-label">Meal choice</label>
+                <div class="rsvp__meal-options">
+                  <label class="rsvp__meal-option">
+                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Meat" {{if eq .MealType "Meat"}}checked{{end}}> Meat
+                  </label>
+
+                  <label class="rsvp__meal-option">
+                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Vegetarian" {{if eq .MealType "Vegetarian"}}checked{{end}}> Vegetarian
+                  </label>
+
+                  <label class="rsvp__meal-option">
+                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Vegan" {{if eq .MealType "Vegan"}}checked{{end}}> Vegan
+                  </label>
+                </div>
+
+                <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Additional dietary requirements</label>
+                <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
+
+                <label class="rsvp__section-label"for="{{.FieldName "bingo_fact"}}">Random fact about yourself (for "People Bingo" game)</label>
+                <textarea class="rsvp__textarea" name="{{.FieldName "bingo_fact"}}">{{.BingoFact}}</textarea>
+              </div>
+            {{end}}
+
+            {{if or (eq .Guest.PartOfDay "Service & Reception") (eq .Guest.PartOfDay "Service & Evening")}}
+              <div class="rsvp__part-of-day">
+                <div class="rsvp__part-of-day-label">
+                  Evening<br>
+                  <small>(8pm onwards)</small>
+                </div>
+
+                <label class="rsvp__part-of-day-option">
+                  <input type="radio" name="{{.FieldName "attending_evening"}}" value="1" {{if .AttendingEvening}}checked{{end}}> Attending
+                </label>
+
+                <label class="rsvp__part-of-day-option">
+                  <input type="radio" name="{{.FieldName "attending_evening"}}" {{if .NotAttendingEvening}}checked{{end}}> Not attending
+                </label>
+              </div>
+            {{end}}
           </div>
         {{end}}
-      </div>
-    {{end}}
 
-    <input type="submit" value="Submit" />
-  </form>
+        <button class="rsvp__button" type="submit">Submit</button>
+      </form>
+    </div>
 
-  <script src="{{asset_path "rsvp.js"}}"></script>
+    <script src="{{asset_path "rsvp.js"}}"></script>
+  {{end}}
 {{end}}

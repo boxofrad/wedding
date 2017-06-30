@@ -1,5 +1,155 @@
+@mixin clearfix {
+  &::after {
+    content:" ";
+    display:table;
+    clear:both;
+  }
+}
+
+@mixin mobile {
+    @media (max-width: 520px) {
+      @content;
+    }
+}
+
 body {
-  background: pink;
+  padding: 20px;
+  background: #f6fafb;
+  font-family: 'Slabo 27px', serif;
+}
+
+.error-message {
+  display: block;
+  box-sizing: border-box;
+  margin: auto;
+  margin-bottom: 20px;
+  max-width: 550px;
+  background: #f31e1e;
+  color: white;
+  padding: 10px;
+}
+
+.rsvp {
+  @include clearfix;
+
+  box-sizing: border-box;
+  max-width: 550px;
+  padding: 20px;
+  margin: auto;
+  background: #ffffff;
+
+  &__title,
+  &__subtitle {
+    text-align: center;
+    font-weight: normal;
+    margin: 0;
+  }
+
+  &__title {
+    color: #77cef1;
+    font-size: 58px;
+  }
+
+  &__subtitle {
+    color: #8da4ad;
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  &__guest {
+    background: #f6fafb;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+
+  &__button {
+    float: right;
+    padding: 10px 20px;
+    background: #77cef1;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Slabo 27px', serif;
+    font-size: 18px;
+    outline: none;
+
+    &:hover {
+      background: #46b5e2;
+    }
+
+    &:disabled {
+      background: #c9c9ca;
+    }
+
+    @include mobile {
+      width: 100%;
+    }
+  }
+
+  &__guest-name {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  &__part-of-day {
+    margin-bottom: 10px;
+    font-size: 0;
+  }
+
+  &__part-of-day-label,
+  &__part-of-day-option {
+    vertical-align: middle;
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 16px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &__part-of-day-label {
+    width: 150px;
+
+    @include mobile {
+      display: block;
+      margin-bottom: 10px;
+    }
+  }
+
+  &__reception-fields {
+    margin-left: 170px;
+
+    @include mobile {
+      margin-left: 0;
+    }
+  }
+
+  &__meal-options {
+    margin-bottom: 20px;
+  }
+
+  &__meal-option {
+    margin-right: 10px;
+  }
+
+  &__section-label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  &__textarea {
+    box-sizing: border-box;
+    width: 100%;
+    resize: vertical;
+    padding: 10px;
+    border-radius: 3px;
+    border: 1px solid #8da4ad;
+    outline: none;
+  }
 }
 
 .hidden {
