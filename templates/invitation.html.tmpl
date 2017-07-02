@@ -15,7 +15,7 @@
 
             <div class="rsvp__part-of-day">
               <div class="rsvp__part-of-day-label">
-                Service<br>
+                Service + drink<br>
                 <small>(1.15pm &mdash; 2.45pm)</small>
               </div>
 
@@ -32,7 +32,7 @@
               <div class="rsvp__part-of-day">
                 <div class="rsvp__part-of-day-label">
                   Reception<br>
-                  <small>(3.15pm &mdash; 8pm)</small>
+                  <small>(3.15pm onwards)</small>
                 </div>
 
                 <label class="rsvp__part-of-day-option">
@@ -68,7 +68,7 @@
               </div>
             {{end}}
 
-            {{if or (eq .Guest.PartOfDay "Service & Reception") (eq .Guest.PartOfDay "Service & Evening")}}
+            {{if eq .Guest.PartOfDay "Service & Evening"}}
               <div class="rsvp__part-of-day">
                 <div class="rsvp__part-of-day-label">
                   Evening<br>

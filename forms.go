@@ -164,7 +164,7 @@ func (g GuestForm) Validate(single bool) []string {
 		}
 	}
 
-	if g.Guest.PartOfDay == "Service & Reception" || g.Guest.PartOfDay == "Service & Evening" {
+	if g.Guest.PartOfDay == "Service & Evening" {
 		if g.RawAttendingEvening == "" {
 			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the evening reception.", salutation))
 		}
@@ -174,11 +174,18 @@ func (g GuestForm) Validate(single bool) []string {
 }
 
 func (g GuestForm) UpdateParams() UpdateGuestParams {
+	var attendingEvening bool
+	if g.Guest.PartOfDay == "Service & Reception" {
+		attendingEvening = g.AttendingReception()
+	} else {
+		attendingEvening = g.AttendingEvening()
+	}
+
 	return UpdateGuestParams{
 		RSVPReceived:                  true,
 		AttendingService:              g.AttendingService(),
 		AttendingReception:            g.AttendingReception(),
-		AttendingEvening:              g.AttendingEvening(),
+		AttendingEvening:              attendingEvening,
 		MealType:                      g.MealType(),
 		AdditionalDietaryRequirements: g.AdditionalDietaryRequirements(),
 		BingoFact:                     g.BingoFact(),
