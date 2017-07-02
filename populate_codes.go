@@ -51,8 +51,10 @@ func generateCodes(n int) ([]string, error) {
 		// Don't want words with ambiguous characters
 		// Inspired by Crockford's Base32
 		if strings.ContainsRune(word, 'I') ||
+			strings.ContainsRune(word, '1') ||
 			strings.ContainsRune(word, 'L') ||
 			strings.ContainsRune(word, 'O') ||
+			strings.ContainsRune(word, '0') ||
 			strings.ContainsRune(word, 'U') {
 			continue
 		}
@@ -60,13 +62,13 @@ func generateCodes(n int) ([]string, error) {
 		words = append(words, word)
 	}
 
+	numbers := []int{2, 3, 4, 5, 6, 7, 8, 9}
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	codes := make([]string, n)
 	for i := 0; i < n; i++ {
 		word := words[rand.Intn(len(words))]
-		number := rand.Intn(99)
-		codes[i] = fmt.Sprintf("%s%02d", word, number)
+		codes[i] = fmt.Sprintf("%s%d%d", word, numbers[rand.Intn(len(numbers))], numbers[rand.Intn(len(numbers))])
 	}
 
 	return codes, nil
