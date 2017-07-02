@@ -22,10 +22,6 @@ body {
   font-size: 20px;
 }
 
-input {
-  -webkit-appearance: none;
-}
-
 .error-message {
   display: block;
   box-sizing: border-box;
@@ -70,6 +66,7 @@ input {
   }
 
   &__button {
+    -webkit-appearance: none;
     font-family: $body-font-family;
     float: right;
     padding: 10px 20px;
@@ -200,6 +197,7 @@ input {
   }
 
   &__button {
+    -webkit-appearance: none;
     height: 50px;
     box-sizing: border-box;
     float: right;
