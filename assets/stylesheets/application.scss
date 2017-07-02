@@ -22,6 +22,10 @@ body {
   font-size: 20px;
 }
 
+input {
+  -webkit-appearance: none;
+}
+
 .error-message {
   display: block;
   box-sizing: border-box;
