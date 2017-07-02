@@ -1,3 +1,5 @@
+@import 'fonts.scss';
+
 @mixin clearfix {
   &::after {
     content:" ";
@@ -14,8 +16,10 @@
 
 body {
   padding: 20px;
-  background: #f6fafb;
-  font-family: 'Slabo 27px', serif;
+  background: #f9f9f9;
+  color: #525659;
+  font-family: $body-font-family;
+  font-size: 20px;
 }
 
 .error-message {
@@ -46,40 +50,35 @@ body {
   }
 
   &__title {
-    color: #77cef1;
+    font-family: $header-font-family;
     font-size: 58px;
   }
 
   &__subtitle {
-    color: #8da4ad;
-    font-size: 24px;
+    font-size: 48px;
     margin-bottom: 30px;
   }
 
   &__guest {
-    background: #f6fafb;
+    background: #f9f9f9;
     padding: 10px;
     margin-bottom: 20px;
   }
 
   &__button {
+    font-family: $body-font-family;
     float: right;
     padding: 10px 20px;
-    background: #77cef1;
     color: #ffffff;
     border: none;
     border-radius: 3px;
     cursor: pointer;
-    font-family: 'Slabo 27px', serif;
-    font-size: 18px;
+    font-size: 25px;
     outline: none;
+    background: #278f50;
 
     &:hover {
-      background: #46b5e2;
-    }
-
-    &:disabled {
-      background: #c9c9ca;
+      background: #238249;
     }
 
     @include mobile {
@@ -90,7 +89,7 @@ body {
   &__guest-name {
     margin: 0;
     margin-bottom: 10px;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: bold;
   }
 
@@ -104,7 +103,7 @@ body {
     vertical-align: middle;
     display: inline-block;
     margin-right: 20px;
-    font-size: 16px;
+    font-size: 20px;
 
     &:last-child {
       margin-right: 0;
@@ -150,8 +149,67 @@ body {
     border: 1px solid #8da4ad;
     outline: none;
   }
+
+  &__form {
+    @include clearfix;
+  }
 }
 
 .hidden {
   display: none;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.link {
+  text-decoration: underline;
+  color: #adadad;
+}
+
+.entry-form {
+  @include clearfix;
+
+  width: 230px;
+  margin: auto;
+  text-align: center;
+
+  &__input,
+  &__button {
+    float: left;
+    vertical-align: middle;
+    font-family: $body-font-family;
+  }
+
+  &__input {
+    width: 120px;
+    height: 50px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 20px;
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 1px solid #a8a8a9;
+    padding: 10px;
+    text-transform: uppercase;
+  }
+
+  &__button {
+    height: 50px;
+    box-sizing: border-box;
+    float: right;
+    padding: 10px 20px;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 25px;
+    outline: none;
+    background: #278f50;
+
+    &:hover {
+      background: #238249;
+    }
+  }
 }

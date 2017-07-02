@@ -1,8 +1,15 @@
 {{define "content"}}
-  <h1>RSVP</h1>
+  <div class="rsvp">
+    <h1 class="rsvp__title">Claire &amp; Daniel's Wedding</h1>
+    <h2 class="rsvp__subtitle">RSVP</h2>
 
-  <form action="/rsvp" method="POST">
-    <input type="text" name="code" />
-    <input type="submit" value="Submit" />
-  </form>
+    <p class="center-text">Please enter the code written on your RSVP card</p>
+
+    <form action="/rsvp" method="POST" class="entry-form">
+      <input type="text" name="code" class="entry-form__input" maxlength="6" placeholder="MYCODE" />
+      <input type="submit" value="Submit" class="entry-form__button" />
+    </form>
+
+    <p class="center-text"><a href="/gifts" class="link">Looking for the gift list?</a></p>
+  </div>
 {{end}}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -26,12 +27,12 @@ var (
 
 func runServer() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", serveTemplate("index"))
+	r.Handle("/", http.RedirectHandler("/rsvp", http.StatusFound))
 	r.HandleFunc("/rsvp", serveTemplate("rsvp_form")).Methods("GET")
 	r.HandleFunc("/rsvp", serveRSVP).Methods("POST")
 	r.HandleFunc("/invitation/{id}", serveInvitationForm).Methods("GET")
 	r.HandleFunc("/invitation/{id}", serveInvitation).Methods("POST")
-	r.HandleFunc("/invitation/{id}/success", serveTemplate("rsvp_success")).Methods("GET")
+	r.HandleFunc("/invitation/{id}/success", serveInvitationSuccess).Methods("GET")
 	r.Handle("/gifts", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
 
 	// TODO: Cache assets
@@ -42,7 +43,7 @@ func runServer() {
 }
 
 func serveRSVP(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
+	code := strings.ToUpper(r.FormValue("code"))
 
 	if code == "" {
 		renderTemplate(w, "rsvp_form", errorMessage{"Please enter the code written on your RSVP card."})
@@ -51,7 +52,7 @@ func serveRSVP(w http.ResponseWriter, r *http.Request) {
 
 	id, err := getInvitationId(code)
 	if err == ErrNotFound {
-		renderTemplate(w, "rsvp_form", errorMessage{"Uh-oh, we don't recognise that code. Please make sure you typed it correctly."})
+		renderTemplate(w, "rsvp_form", errorMessage{"We don't recognise that code. Please make sure you typed it correctly."})
 		return
 	}
 	if err != nil {
@@ -107,6 +108,37 @@ func serveInvitation(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	http.Redirect(w, r, "/invitation/"+id+"/success", http.StatusFound)
+}
+
+func serveInvitationSuccess(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+
+	invitation, err := getInvitation(id)
+	if err != nil {
+		handleErr(w, err)
+		return
+	}
+
+	var attending bool
+	for _, guest := range invitation.Guests {
+		if guest.AttendingService || guest.AttendingReception || guest.AttendingEvening {
+			attending = true
+		}
+	}
+
+	var reaction string
+	if attending {
+		reaction = "delighted you'll be joining us to celebrate our special day"
+	} else {
+		reaction = "very sad you won't be joining us, but we understand"
+	}
+
+	renderTemplate(w, "rsvp_success", struct {
+		Reaction     string
+		ErrorMessage string
+	}{reaction, ""})
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {

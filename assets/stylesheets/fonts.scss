@@ -1,0 +1,22 @@
+@font-face{ 
+	font-family: 'Beacon';
+	src: url('beacon.eot');
+	src: url('beacon.eot?#iefix') format('embedded-opentype'),
+	     url('beacon.woff2') format('woff2'),
+	     url('beacon.woff') format('woff'),
+	     url('beacon.ttf') format('truetype'),
+	     url('beacon.svg#webfont') format('svg');
+}
+
+@font-face{ 
+	font-family: 'Amatic SC';
+	src: url('amaticsc.eot');
+	src: url('amaticsc.eot?#iefix') format('embedded-opentype'),
+	     url('amaticsc.woff2') format('woff2'),
+	     url('amaticsc.woff') format('woff'),
+	     url('amaticsc.ttf') format('truetype'),
+	     url('amaticsc.svg#webfont') format('svg');
+}
+
+$header-font-family: 'Beacon', sans-serif;
+$body-font-family: 'Amatic SC', sans-serif;

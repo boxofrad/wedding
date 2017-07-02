@@ -31,7 +31,7 @@ func (i InvitationForm) Validate() (bool, []string) {
 	errors := make([]string, 0)
 
 	for _, guestForm := range i.GuestForms {
-		errors = append(errors, guestForm.Validate()...)
+		errors = append(errors, guestForm.Validate(len(i.GuestForms) == 1)...)
 	}
 
 	return len(errors) == 0, errors
@@ -127,32 +127,46 @@ func (g GuestForm) BingoFact() string {
 	return g.RawBingoFact
 }
 
-func (g GuestForm) Validate() []string {
+func (g GuestForm) Validate(single bool) []string {
 	errors := make([]string, 0)
 
+	var salutation string
+	if single {
+		salutation = "you"
+	} else {
+		salutation = g.Guest.FirstName
+	}
+
 	if g.RawAttendingService == "" {
-		errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the service.", g.Guest.FirstName))
+		errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the service.", salutation))
 	}
 
 	if g.Guest.PartOfDay == "Service & Reception" {
 		if g.RawAttendingReception == "" {
-			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the reception.", g.Guest.FirstName))
+			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the reception.", salutation))
 		}
 
 		if g.RawAttendingReception == "1" {
 			if g.RawMealType == "" {
-				errors = append(errors, fmt.Sprintf("Please indicate what kind of meal %s would like.", g.Guest.FirstName))
+				errors = append(errors, fmt.Sprintf("Please indicate what kind of meal %s would like.", salutation))
 			}
 
 			if g.RawBingoFact == "" {
-				errors = append(errors, fmt.Sprintf("Please tell us something random about %s.", g.Guest.FirstName))
+				var who string
+				if single {
+					who = "yourself"
+				} else {
+					who = g.Guest.FirstName
+				}
+
+				errors = append(errors, fmt.Sprintf("Please tell us something random about %s.", who))
 			}
 		}
 	}
 
 	if g.Guest.PartOfDay == "Service & Reception" || g.Guest.PartOfDay == "Service & Evening" {
 		if g.RawAttendingEvening == "" {
-			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the evening reception.", g.Guest.FirstName))
+			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the evening reception.", salutation))
 		}
 	}
 

@@ -1,9 +1,12 @@
 {{define "content"}}
   {{with .InvitationForm}}
     <div class="rsvp">
-      <h1 class="rsvp__title">RSVP</h1>
-      <h2 class="rsvp__subtitle">Daniel &amp; Claire's Wedding</h2>
-      <h3>{{.Invitation.Addressees}}</h3>
+      <h1 class="rsvp__title">Claire &amp; Daniel's Wedding</h1>
+      <h2 class="rsvp__subtitle">RSVP</h2>
+
+      {{if gt 1 (len .GuestForms)}}
+        <h3>{{.Invitation.Addressees}}</h3>
+      {{end}}
 
       <form action="/invitation/{{.Invitation.Id}}" method="POST">
         {{range .GuestForms}}

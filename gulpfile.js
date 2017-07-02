@@ -10,11 +10,12 @@ const filter = require('gulp-filter');
 
 gulp.task('default', () => {
   const imageFilter = filter('**/*.jpg', { restore: true });
+  const fontFilter = filter('**/fonts/*', { restore: true });
   const sassFilter = filter('**/*.scss', { restore: true });
   const cssFilter = filter('**/*.css', { restore: true });
   const jsFilter = filter('**/*.js', { restore: true });
 
-  gulp.src(['./assets/{images,javascripts}/*', './assets/stylesheets/application.scss'])
+  gulp.src(['./assets/{images,javascripts,fonts}/*', './assets/stylesheets/application.scss'])
       // transpile JS
       .pipe(jsFilter)
       .pipe(sourcemaps.init())
@@ -30,6 +31,11 @@ gulp.task('default', () => {
       .pipe(imageFilter)
       .pipe(rev())
       .pipe(imageFilter.restore)
+
+      // flatten fonts
+      .pipe(fontFilter)
+      .pipe(flatten())
+      .pipe(fontFilter.restore)
 
       // compile SASS
       .pipe(sassFilter)
