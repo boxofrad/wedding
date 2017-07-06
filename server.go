@@ -22,7 +22,8 @@ const (
 )
 
 var (
-	listen = ":" + os.Getenv("PORT")
+	listen             = ":" + os.Getenv("PORT")
+	supportPhoneNumber = os.Getenv("SUPPORT_PHONE_NUMBER")
 )
 
 func runServer() {
@@ -168,5 +169,6 @@ func serveTemplate(name string) http.HandlerFunc {
 }
 
 func handleErr(w http.ResponseWriter, err error) {
-	fmt.Fprintf(w, "ERROR: %s", err)
+	fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+	fmt.Fprintf(w, "Whoops, something went wrong!\nIf this continues to happen please call Daniel on %s.", supportPhoneNumber)
 }
