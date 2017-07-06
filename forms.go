@@ -43,7 +43,7 @@ type GuestForm struct {
 	RawAttendingService              string
 	RawAttendingReception            string
 	RawAttendingEvening              string
-	RawMealType                      string
+	RawDietaryPreferences            string
 	RawAdditionalDietaryRequirements string
 	RawBingoFact                     string
 }
@@ -52,7 +52,7 @@ func (g *GuestForm) Parse(r *http.Request) {
 	g.RawAttendingService = r.FormValue(g.FieldName("attending_service"))
 	g.RawAttendingReception = r.FormValue(g.FieldName("attending_reception"))
 	g.RawAttendingEvening = r.FormValue(g.FieldName("attending_evening"))
-	g.RawMealType = r.FormValue(g.FieldName("meal_type"))
+	g.RawDietaryPreferences = r.FormValue(g.FieldName("dietary_preferences"))
 	g.RawAdditionalDietaryRequirements = r.FormValue(g.FieldName("additional_dietary_requirements"))
 	g.RawBingoFact = r.FormValue(g.FieldName("bingo_fact"))
 }
@@ -103,12 +103,12 @@ func (g GuestForm) NotAttendingEvening() bool {
 	return g.RawAttendingEvening == "0"
 }
 
-func (g GuestForm) MealType() string {
-	if g.RawMealType == "" {
-		return g.Guest.MealType
+func (g GuestForm) DietaryPreferences() string {
+	if g.RawDietaryPreferences == "" {
+		return g.Guest.DietaryPreferences
 	}
 
-	return g.RawMealType
+	return g.RawDietaryPreferences
 }
 
 func (g GuestForm) AdditionalDietaryRequirements() string {
@@ -147,8 +147,8 @@ func (g GuestForm) Validate(single bool) []string {
 		}
 
 		if g.RawAttendingReception == "1" {
-			if g.RawMealType == "" {
-				errors = append(errors, fmt.Sprintf("Please indicate what kind of meal %s would like.", salutation))
+			if g.RawDietaryPreferences == "" {
+				errors = append(errors, fmt.Sprintf("Please indicate %s's dietary preferences.", salutation))
 			}
 
 			if g.RawBingoFact == "" {
@@ -186,7 +186,7 @@ func (g GuestForm) UpdateParams() UpdateGuestParams {
 		AttendingService:              g.AttendingService(),
 		AttendingReception:            g.AttendingReception(),
 		AttendingEvening:              attendingEvening,
-		MealType:                      g.MealType(),
+		DietaryPreferences:            g.DietaryPreferences(),
 		AdditionalDietaryRequirements: g.AdditionalDietaryRequirements(),
 		BingoFact:                     g.BingoFact(),
 	}

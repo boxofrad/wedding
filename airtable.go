@@ -29,7 +29,7 @@ type Guest struct {
 	AttendingService              bool
 	AttendingReception            bool
 	AttendingEvening              bool
-	MealType                      string
+	DietaryPreferences            string
 	AdditionalDietaryRequirements string
 	BingoFact                     string
 }
@@ -147,7 +147,7 @@ func getGuest(id string) (*Guest, error) {
 			AttendingService              bool   `json:"Attending Service?"`
 			AttendingReception            bool   `json:"Attending Reception?"`
 			AttendingEvening              bool   `json:"Attending Evening?"`
-			MealType                      string `json:"Meal Type"`
+			DietaryPreferences            string `json:"Dietary Preferences"`
 			AdditionalDietaryRequirements string `json:"Additional Dietary Requirements"`
 			BingoFact                     string `json:"Bingo Fact"`
 		} `json:"fields"`
@@ -164,7 +164,7 @@ func getGuest(id string) (*Guest, error) {
 		AttendingService:              response.Fields.AttendingService,
 		AttendingReception:            response.Fields.AttendingReception,
 		AttendingEvening:              response.Fields.AttendingEvening,
-		MealType:                      response.Fields.MealType,
+		DietaryPreferences:            response.Fields.DietaryPreferences,
 		AdditionalDietaryRequirements: response.Fields.AdditionalDietaryRequirements,
 		BingoFact:                     response.Fields.BingoFact,
 	}, nil
@@ -175,7 +175,7 @@ type UpdateGuestParams struct {
 	AttendingService              bool   `json:"Attending Service?"`
 	AttendingReception            bool   `json:"Attending Reception?"`
 	AttendingEvening              bool   `json:"Attending Evening?"`
-	MealType                      string `json:"Meal Type,omitempty"`
+	DietaryPreferences            string `json:"Dietary Preferences,omitempty"`
 	AdditionalDietaryRequirements string `json:"Additional Dietary Requirements"`
 	BingoFact                     string `json:"Bingo Fact"`
 }

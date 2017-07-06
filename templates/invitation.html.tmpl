@@ -45,18 +45,18 @@
               </div>
 
               <div class="rsvp__reception-fields js-reception-fields {{if not .AttendingReception}}hidden{{end}}">
-                <label class="rsvp__section-label">Meal choice</label>
+                <label class="rsvp__section-label">Dietary preferences</label>
                 <div class="rsvp__meal-options">
                   <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Meat" {{if eq .MealType "Meat"}}checked{{end}}> Meat
+                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="None" {{if or (eq .DietaryPreferences "None") (eq .DietaryPreferences "")}}checked{{end}}> None
                   </label>
 
                   <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Vegetarian" {{if eq .MealType "Vegetarian"}}checked{{end}}> Vegetarian
+                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegetarian" {{if eq .DietaryPreferences "Vegetarian"}}checked{{end}}> Vegetarian
                   </label>
 
                   <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "meal_type"}}" value="Vegan" {{if eq .MealType "Vegan"}}checked{{end}}> Vegan
+                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegan" {{if eq .DietaryPreferences "Vegan"}}checked{{end}}> Vegan
                   </label>
                 </div>
 
