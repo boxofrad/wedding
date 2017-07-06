@@ -44,28 +44,30 @@
                 </label>
               </div>
 
-              <div class="rsvp__reception-fields js-reception-fields {{if not .AttendingReception}}hidden{{end}}">
-                <label class="rsvp__section-label">Dietary preferences</label>
-                <div class="rsvp__meal-options">
-                  <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="None" {{if or (eq .DietaryPreferences "None") (eq .DietaryPreferences "")}}checked{{end}}> None
-                  </label>
+              {{if not (eq .Guest.Age "Baby")}}
+                <div class="rsvp__reception-fields js-reception-fields {{if not .AttendingReception}}hidden{{end}}">
+                  <label class="rsvp__section-label">Dietary preferences</label>
+                  <div class="rsvp__meal-options">
+                    <label class="rsvp__meal-option">
+                      <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="None" {{if or (eq .DietaryPreferences "None") (eq .DietaryPreferences "")}}checked{{end}}> None
+                    </label>
 
-                  <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegetarian" {{if eq .DietaryPreferences "Vegetarian"}}checked{{end}}> Vegetarian
-                  </label>
+                    <label class="rsvp__meal-option">
+                      <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegetarian" {{if eq .DietaryPreferences "Vegetarian"}}checked{{end}}> Vegetarian
+                    </label>
 
-                  <label class="rsvp__meal-option">
-                    <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegan" {{if eq .DietaryPreferences "Vegan"}}checked{{end}}> Vegan
-                  </label>
+                    <label class="rsvp__meal-option">
+                      <input type="radio" name="{{.FieldName "dietary_preferences"}}" value="Vegan" {{if eq .DietaryPreferences "Vegan"}}checked{{end}}> Vegan
+                    </label>
+                  </div>
+
+                  <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Additional dietary requirements (e.g. allergies)</label>
+                  <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
+
+                  <label class="rsvp__section-label"for="{{.FieldName "bingo_fact"}}">Random fact about yourself (for "People Bingo" game)</label>
+                  <textarea class="rsvp__textarea" name="{{.FieldName "bingo_fact"}}">{{.BingoFact}}</textarea>
                 </div>
-
-                <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Additional dietary requirements (e.g. allergies)</label>
-                <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
-
-                <label class="rsvp__section-label"for="{{.FieldName "bingo_fact"}}">Random fact about yourself (for "People Bingo" game)</label>
-                <textarea class="rsvp__textarea" name="{{.FieldName "bingo_fact"}}">{{.BingoFact}}</textarea>
-              </div>
+              {{end}}
             {{end}}
 
             {{if eq .Guest.PartOfDay "Service & Evening"}}

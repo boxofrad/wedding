@@ -25,6 +25,7 @@ type Guest struct {
 	Id                            string
 	FirstName                     string
 	PartOfDay                     string
+	Age                           string
 	RSVPReceived                  bool
 	AttendingService              bool
 	AttendingReception            bool
@@ -143,6 +144,7 @@ func getGuest(id string) (*Guest, error) {
 		Fields struct {
 			FirstName                     string `json:"First Name"`
 			PartOfDay                     string `json:"Part of Day"`
+			Age                           string `json:"Age"`
 			RSVPReceived                  bool   `json:"RSVP Received?"`
 			AttendingService              bool   `json:"Attending Service?"`
 			AttendingReception            bool   `json:"Attending Reception?"`
@@ -160,6 +162,7 @@ func getGuest(id string) (*Guest, error) {
 		Id:                            response.Id,
 		FirstName:                     response.Fields.FirstName,
 		PartOfDay:                     response.Fields.PartOfDay,
+		Age:                           response.Fields.Age,
 		RSVPReceived:                  response.Fields.RSVPReceived,
 		AttendingService:              response.Fields.AttendingService,
 		AttendingReception:            response.Fields.AttendingReception,

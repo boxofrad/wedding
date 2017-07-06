@@ -146,7 +146,7 @@ func (g GuestForm) Validate(single bool) []string {
 			errors = append(errors, fmt.Sprintf("Please indicate if %s will be attending the reception.", salutation))
 		}
 
-		if g.RawAttendingReception == "1" {
+		if g.RawAttendingReception == "1" && g.Guest.Age != "Baby" {
 			if g.RawDietaryPreferences == "" {
 				errors = append(errors, fmt.Sprintf("Please indicate %s's dietary preferences.", salutation))
 			}
