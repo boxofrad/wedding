@@ -129,17 +129,10 @@ func serveInvitationSuccess(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var reaction string
-	if attending {
-		reaction = "delighted you'll be joining us to celebrate our special day"
-	} else {
-		reaction = "very sad you won't be joining us, but we understand"
-	}
-
 	renderTemplate(w, "rsvp_success", struct {
-		Reaction     string
+		Attending    bool
 		ErrorMessage string
-	}{reaction, ""})
+	}{attending, ""})
 }
 
 func renderTemplate(w http.ResponseWriter, name string, data interface{}) {

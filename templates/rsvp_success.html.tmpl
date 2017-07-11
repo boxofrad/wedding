@@ -2,7 +2,31 @@
   <div class="rsvp">
     <h1 class="rsvp__title">Claire &amp; Daniel's Wedding</h1>
     <h2 class="rsvp__subtitle">Thank you!</h2>
-    <p class="center-text">Your RSVP has been received and we're {{.Reaction}}.</p>
-    <p class="center-text"><a href="/gifts" class="link">Looking for the gift list?</a></p>
+    {{if .Attending}}
+      <p class="center-text">Your RSVP has been received and we're delighted you'll be joining us to celebrate our special day.</p>
+
+      <h3>Looking for somewhere to stay?</h3>
+      <p>We have negotiated a special rate for our wedding guests at the <a href="http://www.thewinchesterhotel.co.uk">Winchester Hotel and Spa</a> for the night of the wedding.</p>
+      <p>Bed &amp; Breakfast has been agreed at £140.00 per room.</p>
+      <p>There are 15 rooms available at this rate, which will be allocated on a first come, first served basis. The rate is available for rooms booked before 21.10.17.</p>
+      <p>Please contact the reservations team directly on <a href="tel:01962 709900">01962 709900</a> and quote the following code: ARTH181117.</p>
+      <p>The discounted rate is only available through this route - not on any third party website, nor the hotel's website.</p>
+      <p>Check in is 14.00 on the day of arrival and departure time is 11.00. Unfortunately, early check is not available on the day of arrival.</p>
+      <p>We recognise that even the discounted room price is a little steep! The infamous Winchester Christmas Markets begin the same weekend as our wedding, hence all accommodation in the local area is more expensive than usual. Sorry about that!</p>
+      <p>If you would like to stay in the area, but not in Winchester, we suggest looking in Eastleigh (approx 15 mins by car), Chandlers Ford (approx 20 mins), Alton (just over 30 mins), Romsey (just over 30 mins) or Southampton (just over 30 mins).</p>
+
+      <h3>Thinking about where to park?</h3>
+      <p>There is a public car park opposite the hotel. Bring some change!</p>
+      <p>There is a small hotel car park. Guests who are staying overnight in the hotel will be able to use this and have their ticket validated at reception.</p>
+
+      <h3>Gifts</h3>
+      <p>You really don't have to get us a gift!</p>
+      <p>However, if you would like to, then <a href="/gifts">contributions to our honeymoon</a> would be much appreciated.</p>
+
+      <h3>Any other questions?</h3>
+      <p>Drop us a line at <a href="mailto:claire8521@aol.com">claire8521@aol.com</a> or <a href="mailto:daniel@floppy.co">daniel@floppy.co</a></p>
+    {{else}}
+      <p class="center-text">Your RSVP has been received and we're very sad you won't be joining us, but we understand.</p>
+    {{end}}
   </div>
 {{end}}
