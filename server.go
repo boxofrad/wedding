@@ -36,6 +36,10 @@ func runServer() {
 	r.HandleFunc("/invitation/{id}/success", serveInvitationSuccess).Methods("GET")
 	r.Handle("/gifts", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
 
+	// People keep typing stuff in uppercase
+	r.Handle("/RSVP", http.RedirectHandler("/rsvp", http.StatusFound)).Methods("GET")
+	r.Handle("/GIFTS", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
+
 	// TODO: Cache assets
 	r.PathPrefix(staticPath).
 		Handler(http.StripPrefix(staticPath, http.FileServer(http.Dir("./static"))))
