@@ -91,7 +91,7 @@
 
               {{if not (eq .Guest.Age "Baby")}}
                 <div class="rsvp__reception-fields js-attending-fields {{if not .AttendingEvening}}hidden{{end}}">
-                  <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Dietary requirements (e.g. allergies)</label>
+                  <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Dietary requirements for buffet (e.g. allergies)</label>
                   <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
                 </div>
               {{end}}
