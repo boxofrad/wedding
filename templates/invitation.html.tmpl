@@ -64,7 +64,10 @@
                   <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Additional dietary requirements (e.g. allergies)</label>
                   <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
 
-                  <label class="rsvp__section-label"for="{{.FieldName "bingo_fact"}}">Random fact about yourself (for "People Bingo" game)</label>
+                  <label class="rsvp__section-label"for="{{.FieldName "bingo_fact"}}">
+                    Random fact about yourself (for 'People Bingo' game)<br>
+                    Example: "I once high-fived Ed Sheeran"
+                  </label>
                   <textarea class="rsvp__textarea" name="{{.FieldName "bingo_fact"}}">{{.BingoFact}}</textarea>
                 </div>
               {{end}}
