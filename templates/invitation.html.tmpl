@@ -36,16 +36,16 @@
                 </div>
 
                 <label class="rsvp__part-of-day-option">
-                  <input type="radio" class="js-reception-toggle" name="{{.FieldName "attending_reception"}}" value="1" {{if .AttendingReception}}checked{{end}}> Attending
+                  <input type="radio" class="js-attending-toggle" name="{{.FieldName "attending_reception"}}" value="1" {{if .AttendingReception}}checked{{end}}> Attending
                 </label>
 
                 <label class="rsvp__part-of-day-option">
-                  <input type="radio" class="js-reception-toggle" name="{{.FieldName "attending_reception"}}" value="0" {{if .NotAttendingReception}}checked{{end}}> Not attending
+                  <input type="radio" class="js-attending-toggle" name="{{.FieldName "attending_reception"}}" value="0" {{if .NotAttendingReception}}checked{{end}}> Not attending
                 </label>
               </div>
 
               {{if not (eq .Guest.Age "Baby")}}
-                <div class="rsvp__reception-fields js-reception-fields {{if not .AttendingReception}}hidden{{end}}">
+                <div class="rsvp__reception-fields js-attending-fields {{if not .AttendingReception}}hidden{{end}}">
                   <label class="rsvp__section-label">Dietary preferences</label>
                   <div class="rsvp__meal-options">
                     <label class="rsvp__meal-option">
@@ -78,13 +78,20 @@
                 </div>
 
                 <label class="rsvp__part-of-day-option">
-                  <input type="radio" name="{{.FieldName "attending_evening"}}" value="1" {{if .AttendingEvening}}checked{{end}}> Attending
+                  <input type="radio" class="js-attending-toggle" name="{{.FieldName "attending_evening"}}" value="1" {{if .AttendingEvening}}checked{{end}}> Attending
                 </label>
 
                 <label class="rsvp__part-of-day-option">
-                  <input type="radio" name="{{.FieldName "attending_evening"}}" {{if .NotAttendingEvening}}checked{{end}}> Not attending
+                  <input type="radio" class="js-attending-toggle" name="{{.FieldName "attending_evening"}}" {{if .NotAttendingEvening}}checked{{end}}> Not attending
                 </label>
               </div>
+
+              {{if not (eq .Guest.Age "Baby")}}
+                <div class="rsvp__reception-fields js-attending-fields {{if not .AttendingEvening}}hidden{{end}}">
+                  <label class="rsvp__section-label"for="{{.FieldName "additional_dietary_requirements"}}">Dietary requirements (e.g. allergies)</label>
+                  <textarea class="rsvp__textarea" name="{{.FieldName "additional_dietary_requirements"}}">{{.AdditionalDietaryRequirements}}</textarea>
+                </div>
+              {{end}}
             {{end}}
           </div>
         {{end}}
