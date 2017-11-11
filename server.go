@@ -29,10 +29,16 @@ var (
 func runServer() {
 	r := mux.NewRouter()
 	r.Handle("/", http.RedirectHandler("/rsvp", http.StatusFound))
-	r.HandleFunc("/rsvp", serveTemplate("rsvp_form")).Methods("GET")
+	r.HandleFunc("/rsvp", serveTemplate("rsvp_form", nil)).Methods("GET")
 	r.HandleFunc("/rsvp", serveRSVP).Methods("POST")
-	r.HandleFunc("/invitation/{id}", serveInvitationForm).Methods("GET")
-	r.HandleFunc("/invitation/{id}", serveInvitation).Methods("POST")
+
+	tooLateData := struct {
+		PhoneNumber  string
+		ErrorMessage string
+	}{supportPhoneNumber, ""}
+
+	r.HandleFunc("/invitation/{id}", serveTemplate("too_late", tooLateData)).Methods("GET")
+	r.HandleFunc("/invitation/{id}", serveTemplate("too_late", tooLateData)).Methods("POST")
 	r.HandleFunc("/invitation/{id}/success", serveInvitationSuccess).Methods("GET")
 	r.Handle("/gifts", http.RedirectHandler(giftListURL, http.StatusFound)).Methods("GET")
 
@@ -159,9 +165,9 @@ func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
 	}
 }
 
-func serveTemplate(name string) http.HandlerFunc {
+func serveTemplate(name string, data interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		renderTemplate(w, name, nil)
+		renderTemplate(w, name, data)
 	}
 }
 
